@@ -42,16 +42,8 @@ void Menu()
 		case 1://Добавить вершину в дерево
 			std::cout << "Введите целое число (1-2 знака): ";
 			std::cin >> T;
-			CheckCinInt(T, -9, true, 99, true);//проверка корректности ввода
-			try//Попытка добавления вершины дерева
-			{
-				TreeInt10.Paste(TreeInt10.GetRoot(), T);
-				std::cout << "Добавлено";
-			}
-			catch (std::exception Ex)//Если массив заполнен
-			{
-				std::cerr << Ex.what() << std::endl << "Не добавлено";
-			}
+			TreeInt10.Paste(TreeInt10.GetRoot(), T);
+			std::cout << "Добавлено";
 			break;
 		case 2://Показать дерево
 			std::cout << std::endl << "Количество вершин дерева: "<< TreeInt10.GetCount();

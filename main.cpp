@@ -20,4 +20,5 @@ void main()
 	SetConsoleCP(1251);//Ввод русских букв
 	SetConsoleOutputCP(1251);//Вывод русских букв
 	Menu();
+	system("pause");
 }

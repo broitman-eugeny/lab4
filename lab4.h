@@ -5,7 +5,7 @@ const int ValChPlacesAmount = 2;//Количество знакомест для отображения одного зн
 const int OutSpaceChPlacesAmount = 2;//Количество знакомест для разделителя между вершинами нижнего уровня
 const int InSpaceChPlacesAmount = 1;//Количество знакомест для разделителя между значениями данных одной вершины
 //Шаблон класса дерева двоичного поиска
-template <class Type, int Size=10>
+template <class Type>
 class BSTree
 {
 	//Вложенный класс вершины дерева
@@ -18,7 +18,6 @@ class BSTree
 		//Указатель на вершину правого поддерева
 		Node *Right;
 	public:
-		Node() {};//Т.к. в классе BSTree создается статический массив типа Node, необходим конструктор по умолчанию
 		Node(const Type &);
 		Node(const Node &);
 		Type GetData();//Получение данных в текущей вершине дерева
@@ -28,8 +27,6 @@ class BSTree
 		Node * GetRight();//Получение указателя на вершину правого поддерева текущей вершины дерева
 		void SetRight(Node *);//Запись указателя на вершину правого поддерева в текущую вершину дерева
 	};
-	//Массив, содержащий вершины дерева
-	Node Arr[Size];
 	//Указатель на корень дерева
 	Node *Root;
 	//Количество вершин дерева
@@ -37,6 +34,8 @@ class BSTree
 public:
 	//Конструктор по умолчанию
 	BSTree();
+	~BSTree();//Деструктор
+	Node* ClearAll(Node*);//Удаление дерева
 	Node * Paste(Node *, const Type &);//Вставка вершины дерева
 	int GetCount();//Получение количества вершин дерева
 	Node *GetRoot();//Получение указателя на корень дерева
@@ -45,118 +44,127 @@ public:
 	void ShowLevel(Node * LocalRoot, int ReqLevel, int Height, int TempLevel);//Вывод одного уровня дерева на экран
 };
 //Конструктор с параметром
-template<class Type, int Size>
-BSTree<Type, Size>::Node::Node(const Type &T) : Data(T), Left(NULL), Right(NULL)
+template<class Type>
+BSTree<Type>::Node::Node(const Type &T) : Data(T), Left(NULL), Right(NULL)
 {
 }
 //Конструктор копирования. typename необходимо (см. https://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=RU-RU&k=k(C4346)&rd=true)
-template<class Type, int Size>
-BSTree<Type, Size>::Node::Node(const typename BSTree<Type, Size>::Node &T) : Data(T.Data), Left(T.Left), Right(T.Right)
+template<class Type>
+BSTree<Type>::Node::Node(const typename BSTree<Type>::Node &T) : Data(T.Data), Left(T.Left), Right(T.Right)
 {
 }
-template<class Type, int Size>
-Type BSTree<Type, Size>::Node::GetData()
+template<class Type>
+Type BSTree<Type>::Node::GetData()
 {
 	return Data;
 }
-template<class Type, int Size>
-void BSTree<Type, Size>::Node::SetData(const Type &T)
+template<class Type>
+void BSTree<Type>::Node::SetData(const Type &T)
 {
 	Data = T;
 }
-template<class Type, int Size>
-typename BSTree<Type, Size>::Node * BSTree<Type, Size>::Node::GetLeft()//typename необходимо (см. https://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=RU-RU&k=k(C4346)&rd=true)
+template<class Type>
+typename BSTree<Type>::Node * BSTree<Type>::Node::GetLeft()//typename необходимо (см. https://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=RU-RU&k=k(C4346)&rd=true)
 {
 	return Left;
 }
-template<class Type, int Size>
-void BSTree<Type, Size>::Node::SetLeft(typename BSTree<Type, Size>::Node *T)
+template<class Type>
+void BSTree<Type>::Node::SetLeft(typename BSTree<Type>::Node *T)
 {
 	Left = T;
 }
-template<class Type, int Size>
-typename BSTree<Type, Size>::Node * BSTree<Type, Size>::Node::GetRight()//typename необходимо (см. https://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=RU-RU&k=k(C4346)&rd=true)
+template<class Type>
+typename BSTree<Type>::Node * BSTree<Type>::Node::GetRight()//typename необходимо (см. https://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=RU-RU&k=k(C4346)&rd=true)
 {
 	return Right;
 }
-template<class Type, int Size>
-void BSTree<Type, Size>::Node::SetRight(typename BSTree<Type, Size>::Node *T)
+template<class Type>
+void BSTree<Type>::Node::SetRight(typename BSTree<Type>::Node *T)
 {
 	Right = T;
 }
 //Конструктор по умолчанию
-template<class Type, int Size>
-BSTree<Type, Size>::BSTree() : Root(NULL), Count(0)
+template<class Type>
+BSTree<Type>::BSTree() : Root(NULL), Count(0)
 {
 }
+//Деструктор
+template<class Type>
+BSTree<Type>::~BSTree()
+{
+	ClearAll(Root);//Удалить все вершины дерева
+	std::cout << std::endl << "Осталось " << GetCount() << " вершин" << std::endl;
+}
+//Удаление всех вершин дерева
+//LocalRoot - указатель на текущую вершину дерева, а для первого вызова - указатель на корень дерева
+template<class Type>
+typename BSTree<Type>::Node * BSTree<Type>::ClearAll(typename BSTree<Type>::Node *LocalRoot)
+{
+	if (LocalRoot == NULL)//Дошли до конца ветки
+	{
+		return NULL;
+	}
+	BSTree<Type>::Node *LocalLeft, *LocalRight;
+	LocalLeft = ClearAll(LocalRoot->GetLeft());//Идем в конец левой ветки
+	LocalRight= ClearAll(LocalRoot->GetRight());//Идем в конец правой ветки
+	//Дошли до конца обеих веток
+	delete LocalRoot;
+	Count--;
+	return NULL;
+}
 //Вставка вершины дерева
-//Если есть место в массиве Arr - записывает данные в первый свободный элемент массива Arr,
-//ищет место вставки вершины по критерию упорядоченности (левое поддерево должно иметь значения данных
+//Ищет место вставки вершины по критерию упорядоченности (левое поддерево должно иметь значения данных
 //строго меньше значения данных родителя, а правое поддерево должно иметь значения данных больше,
 //либо равные значению данных родителя), устанавливает ссылки на соответствующие вершины.
-//Если массив Arr заполнен - выбрасывает исключение.
 //LocalRoot - указатель на текущую вершину дерева, а для первого вызова - указатель на корень дерева
 //T - значение данных вершины
 //Возвращает указатель на корень дерева
-template<class Type, int Size>
-typename BSTree<Type, Size>::Node * BSTree<Type, Size>::Paste(typename BSTree<Type, Size>::Node *LocalRoot, const Type &T)//typename необходимо (см. https://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=RU-RU&k=k(C4346)&rd=true)
+template<class Type>
+typename BSTree<Type>::Node * BSTree<Type>::Paste(typename BSTree<Type>::Node *LocalRoot, const Type &T)//typename необходимо (см. https://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=RU-RU&k=k(C4346)&rd=true)
 {
 	if (Count == 0)//Дерево пустое
 	{
-		Arr[0].SetData(T);
-		Arr[0].SetLeft(NULL);
-		Arr[0].SetRight(NULL);
-		Root = &(Arr[0]);
+		Root = new Node(T);//Создание вершины со значением данных Т и указателями на потомков NULL
 		Count = 1;
 		return Root;
 	}
 	else//Дерево не пустое
 	{
-		if (Count < Size)//Еще есть место в массиве
+		if (LocalRoot == NULL)//Текущая вершина пустая
 		{
-			if (LocalRoot == NULL)//Текущая вершина пустая
-			{
-				Arr[Count].SetData(T);//Поместить T в первый свободный элемент массива Arr
-									  //Обнулить указатели на потомков
-				Arr[Count].SetLeft(NULL);
-				Arr[Count].SetRight(NULL);
-				return &(Arr[Count++]);
-			}
-			else//Текущая вершина занята. Рекурсивно ищем подходящую свободную вершину
-			{
-				if (LocalRoot->GetData() > T)//Если данные в текущей вершине дерева строго больше вставляемого значения
-				{
-					//Ищем в левом поддереве подходящую пустую вершину
-					LocalRoot->SetLeft(Paste(LocalRoot->GetLeft(), T));
-				}
-				else//Данные в текущей вершине дерева не больше вставляемого значения
-				{
-					//Ищем в правом поддереве подходящую пустую вершину
-					LocalRoot->SetRight(Paste(LocalRoot->GetRight(), T));
-				}
-				return LocalRoot;
-			}
+			Count++;
+			return new Node(T);//Создание вершины со значением данных Т и указателями на потомков NULL
 		}
-		else//В массиве нет места
+		else//Текущая вершина занята. Рекурсивно ищем подходящую свободную вершину
 		{
-			throw std::exception("\nМ а с с и в  з а п о л н е н ! ! !");
+			if (LocalRoot->GetData() > T)//Если данные в текущей вершине дерева строго больше вставляемого значения
+			{
+				//Ищем в левом поддереве подходящую пустую вершину
+				LocalRoot->SetLeft(Paste(LocalRoot->GetLeft(), T));
+			}
+			else//Данные в текущей вершине дерева не больше вставляемого значения
+			{
+				//Ищем в правом поддереве подходящую пустую вершину
+				LocalRoot->SetRight(Paste(LocalRoot->GetRight(), T));
+			}
+			return LocalRoot;
 		}
 	}
 }
-template<class Type, int Size>
-int BSTree<Type, Size>::GetCount()
+template<class Type>
+int BSTree<Type>::GetCount()
 {
 	return Count;
 }
-template<class Type, int Size>
-typename BSTree<Type, Size>::Node * BSTree<Type, Size>::GetRoot()
+template<class Type>
+typename BSTree<Type>::Node * BSTree<Type>::GetRoot()
 {
 	return Root;
 }
 //Функция вычисляет высоту дерева с учетом веток к нулевым вершинам
 //LocalRoot - указатель на текущую вершину дерева, а для первого вызова - указатель на корень дерева
-template<class Type, int Size>
-int BSTree<Type, Size>::TreeHeight(typename BSTree<Type, Size>::Node * LocalRoot)
+template<class Type>
+int BSTree<Type>::TreeHeight(typename BSTree<Type>::Node * LocalRoot)
 {
 	if (LocalRoot == NULL)//Дошли до конца ветви
 	{
@@ -169,8 +177,8 @@ int BSTree<Type, Size>::TreeHeight(typename BSTree<Type, Size>::Node * LocalRoot
 }
 //Функция отображает дерево
 //LocalRoot - указатель на корень дерева
-template<class Type, int Size>
-void BSTree<Type, Size>::Show(typename BSTree<Type, Size>::Node * LocalRoot)
+template<class Type>
+void BSTree<Type>::Show(typename BSTree<Type>::Node * LocalRoot)
 {
 	int Height = TreeHeight(LocalRoot);//Высота дерева с учетом нулевых веток
 	printf("\n");
@@ -185,8 +193,8 @@ void BSTree<Type, Size>::Show(typename BSTree<Type, Size>::Node * LocalRoot)
 //ReqLevel - номер печатаемого уровня
 //Height - высота дерева, включающая ветки к нулевым вершинам
 //TempLevel - текущий уровень (для поиска вершин печатаемого уровня)
-template<class Type, int Size>
-void BSTree<Type, Size>::ShowLevel(typename BSTree<Type, Size>::Node * LocalRoot, int ReqLevel, int Height, int TempLevel)
+template<class Type>
+void BSTree<Type>::ShowLevel(typename BSTree<Type>::Node * LocalRoot, int ReqLevel, int Height, int TempLevel)
 {
 	char FormatS[5];
 	FormatS[0] = '%';
