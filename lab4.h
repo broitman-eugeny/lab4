@@ -37,6 +37,7 @@ public:
 	~BSTree();//Деструктор
 	Node* ClearAll(Node*);//Удаление дерева
 	Node * Paste(Node *, const Type &);//Вставка вершины дерева
+	Node * Delete(Node *, const Type &);//Удаление вершины дерева
 	int GetCount();//Получение количества вершин дерева
 	Node *GetRoot();//Получение указателя на корень дерева
 	int TreeHeight(Node * LocalRoot);//Вычисляет высоту дерева с учетом веток к нулевым вершинам
@@ -150,6 +151,98 @@ typename BSTree<Type>::Node * BSTree<Type>::Paste(typename BSTree<Type>::Node *L
 			return LocalRoot;
 		}
 	}
+}
+//Удаление вершины дерева
+//LocalRoot - указатель на текущую вершину дерева, а для первого вызова - указатель на корень дерева
+//Del - удаляемое значение данных вершины
+//Возвращает указатель на корень дерева
+template<class Type>
+typename BSTree<Type>::Node * BSTree<Type>::Delete(typename BSTree<Type>::Node *LocalRoot, const Type &DelData)
+{
+	if (LocalRoot == NULL)//Дошли до конца ветки
+	{
+		return NULL;
+	}
+	else
+	{
+		Type TData = LocalRoot->GetData();//данные текущей вершины
+		typename BSTree<Type>::Node *TLeft= LocalRoot->GetLeft();//указатель на левого потомка
+		typename BSTree<Type>::Node *TRight = LocalRoot->GetRight();//указатель на правого потомка
+		if (TData > DelData)//Данные вершины больше удаляемого значения
+		{
+			LocalRoot->SetLeft(Delete(TLeft, DelData));//Уходим влево
+		}
+		if (TData < DelData)//Данные вершины меньше удаляемого значения
+		{
+			LocalRoot->SetRight(Delete(TRight, DelData));//Уходим вправо
+		}
+		if (TData == DelData)//Данные вершины равны удаляемому значению
+		{
+			Count--;//Уменьшаем счетчик вершин
+			if (TLeft == NULL && TRight == NULL)//Дошли до конечной вершины
+			{
+				if (Root == LocalRoot)//Если удаляем корень дерева
+				{
+					Root= NULL;
+				}
+				delete LocalRoot;//Освобождаем  память из-под удаляемой вершины
+				return NULL;//Передаем родителю NULL указатель вместо указателя на удаленного потомка
+			}
+			if (TLeft != NULL && TRight == NULL)//Слева есть потомок, справа - нет
+			{
+				if (Root == LocalRoot)//Если удаляем корень дерева
+				{
+					Root = TLeft;
+				}
+				delete LocalRoot;//Освобождаем  память из-под удаляемой вершины
+				return TLeft;//Передаем родителю указатель на левого вместо указателя на удаленного потомка
+			}
+			if (TLeft == NULL && TRight != NULL)//Справа есть потомок, слева - нет
+			{
+				if (Root == LocalRoot)//Если удаляем корень дерева
+				{
+					Root = TRight;
+				}
+				delete LocalRoot;//Освобождаем  память из-под удаляемой вершины
+				return TRight;//Передаем родителю указатель на правого вместо указателя на удаленного потомка
+			}
+			if (TLeft != NULL && TRight != NULL)//Справа есть потомок, и слева - есть
+			{
+				Node *T1 = TRight;//Уходим в правое поддерево
+				if (T1->GetLeft() != NULL)//Если в правом поддереве есть левый потомок
+				{
+					Node *T2 = T1->GetLeft();//Уходим в левое поддерево правого поддерева
+					while (T2->GetLeft() != NULL)//Спускаемся по левым потомкам правого поддерева до конца ветки
+					{
+						T1 = T2;
+						T2 = T2->GetLeft();
+					}
+					//T2 - самый левый потомок правого поддерева удаляемой вершины
+					//T1 - родитель T2
+					T1->SetLeft(NULL);//Убираем левого потомка у T1
+					T2->SetLeft(TLeft);//Переназначаем левого потомка удаляемой вершины
+					T2->SetRight(TRight);//Переназначаем правого потомка удаляемой вершины
+					if (Root == LocalRoot)//Если удаляем корень дерева
+					{
+						Root = T2;
+					}
+					delete LocalRoot;//Освобождаем  память из-под удаляемой вершины
+					return T2;//Передаем родителю удаленной вершины указатель на самого левого потомка правого поддерева
+				}
+				else//В правом поддереве нет левого потомка
+				{
+					T1->SetLeft(TLeft);//Переназначаем левого потомка удаляемой вершины
+					if (Root == LocalRoot)//Если удаляем корень дерева
+					{
+						Root = T1;
+					}
+					delete LocalRoot;//Освобождаем  память из-под удаляемой вершины
+					return T1;//Передаем родителю указатель на правого вместо указателя на удаленного потомка
+				}
+			}
+		}
+	}
+	return LocalRoot;//Если значения DelData нет в дереве
 }
 template<class Type>
 int BSTree<Type>::GetCount()

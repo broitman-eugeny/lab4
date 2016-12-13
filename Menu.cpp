@@ -4,8 +4,9 @@ void ShowMenu()
 {
 	std::cout << std::endl << "Лабораторная работа №4 (ООП)" << std::endl << "Контейнер - двоичное дерево";
 	std::cout << std::endl << "[1]. Добавить вершину в дерево";
-	std::cout << std::endl << "[2]. Показать дерево";
-	std::cout << std::endl << "[3]. Выход";
+	std::cout << std::endl << "[2]. Удалить вершину из дерева";
+	std::cout << std::endl << "[3]. Показать дерево";
+	std::cout << std::endl << "[4]. Выход";
 	std::cout << std::endl << "Введите номер требуемого пункта меню: ";
 }
 //Функция проверки ввода из потока std::cin целочисленного значения
@@ -32,25 +33,31 @@ void Menu()
 	BSTree<int> TreeInt10;//Котейнер-дерево для целых чисел на 10 вершин
 	int T;
 	int C = -1;
-	while (C != 3)//3 - выход
+	while (C != 4)//4 - выход
 	{
 		ShowMenu();
 		std::cin >> C;
-		CheckCinInt(C, 1, true, 3, true);//проверка корректности ввода
+		CheckCinInt(C, 1, true, 4, true);//проверка корректности ввода
 		switch (C)
 		{
 		case 1://Добавить вершину в дерево
-			std::cout << "Введите целое число (1-2 знака): ";
+			std::cout << "Введите данные вершины (целое число, 1-2 знака): ";
 			std::cin >> T;
 			TreeInt10.Paste(TreeInt10.GetRoot(), T);
-			std::cout << "Добавлено";
+			std::cout << "Вершин стало " << TreeInt10.GetCount();
 			break;
-		case 2://Показать дерево
+		case 2://Удалить вершину из дерева
+			std::cout << "Введите данные вершины (целое число, 1-2 знака): ";
+			std::cin >> T;
+			TreeInt10.Delete(TreeInt10.GetRoot(), T);
+			std::cout << "Вершин стало " << TreeInt10.GetCount();
+			break;
+		case 3://Показать дерево
 			std::cout << std::endl << "Количество вершин дерева: "<< TreeInt10.GetCount();
 			TreeInt10.Show(TreeInt10.GetRoot());//Вывод дерева на экран
 			break;
-		case 3://Выход
+		case 4://Выход
 			break;
 		}//switch (C)
-	}//while (C != 3)//3 - выход
+	}//while (C != 4)//4 - выход
 }
