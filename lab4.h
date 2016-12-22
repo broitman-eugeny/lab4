@@ -143,11 +143,16 @@ typename BSTree<Type>::Node * BSTree<Type>::Paste(typename BSTree<Type>::Node *L
 				//Ищем в левом поддереве подходящую пустую вершину
 				LocalRoot->SetLeft(Paste(LocalRoot->GetLeft(), T));
 			}
-			else//Данные в текущей вершине дерева не больше вставляемого значения
-			{
-				//Ищем в правом поддереве подходящую пустую вершину
-				LocalRoot->SetRight(Paste(LocalRoot->GetRight(), T));
-			}
+			else
+				if(LocalRoot->GetData() < T)//Данные в текущей вершине дерева меньше вставляемого значения
+				{
+					//Ищем в правом поддереве подходящую пустую вершину
+					LocalRoot->SetRight(Paste(LocalRoot->GetRight(), T));
+				}
+				else//Данные в текущей вершине дерева равны вставляемому значению
+				{
+					throw std::exception("Данные вершины (ключ) должны быть уникальны!!!");
+				}
 			return LocalRoot;
 		}
 	}

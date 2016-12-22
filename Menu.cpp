@@ -43,7 +43,15 @@ void Menu()
 		case 1://Добавить вершину в дерево
 			std::cout << "Введите данные вершины (целое число, 1-2 знака): ";
 			std::cin >> T;
-			TreeInt10.Paste(TreeInt10.GetRoot(), T);
+			try
+			{
+				TreeInt10.Paste(TreeInt10.GetRoot(), T);
+			}
+			catch (std::exception e)
+			{
+				std::cerr << std::endl << e.what();
+				break;
+			}
 			std::cout << "Вершин стало " << TreeInt10.GetCount();
 			break;
 		case 2://Удалить вершину из дерева
